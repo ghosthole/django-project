@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% load static  %}
+<!--http://127.0.0.1:8000/static/  -->
+<!-- подключение переменной статики которая указывает ссылку -->
+
+<!-- наследовали шаблон -->
+{% block title %} Тест {% endblock %}
+
+
+{% block content %}
+<h1>Это тестовая страница 1</h1>
+
+<!-- <img src="http://127.0.0.1:8000/static/img/adv.png " > -->
+<img src="{%static 'img/adv.png'%}" >
+
+<a href="{%url 'test2' %}">Ссылка на первую страницу</a>
+
+{% endblock %}
