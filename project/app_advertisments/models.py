@@ -7,7 +7,6 @@ from django.utils import timezone
 User = get_user_model()
 
 
-# Create your models here.
 class Advertisement(models.Model):
     title = models.CharField("title", max_length=128)
     description = models.TextField("description")       # 2 числа после запятой
