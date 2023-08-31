@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib import admin
+from django.urls import reverse
 from django.utils.html import format_html
 from django.contrib.auth import get_user_model  # получаем модель user'а
 from django.utils import timezone
@@ -17,6 +18,9 @@ class Advertisement(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)  # если user будет удален, то все связанные объявления
     # тоже удаляться
     image = models.ImageField("изображение", upload_to="advertisments/")
+
+    def get_absolute_url(self):
+        return reverse("adv-detail", kwargs={"pk": self.pk})
 
     @admin.display(description="Дата создания")
     def created_date(self):

@@ -22,7 +22,8 @@ from django.conf.urls.static import static  # функция для создан
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", include("app_advertisments.urls"))
+    path("", include("app_advertisments.urls")),
+    path("myauth/", include("app_auth.urls"))
 ]
 
 # если debug - true

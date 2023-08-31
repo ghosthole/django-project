@@ -31,4 +31,3 @@ class AdvertisementForm(forms.ModelForm):
         if title[0] == "?":
             raise ValidationError(f"Название не должно начинаться со знака «{title[0]}»")
         return title
-

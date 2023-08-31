@@ -1,7 +1,9 @@
+from django.contrib.auth import get_user_model
+from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import render, redirect  # для отправки html по запросу пользователя
-from django.urls import reverse
-
+from django.urls import reverse, reverse_lazy
+from django.contrib.auth.decorators import login_required
 from .models import Advertisement
 from .forms import AdvertisementForm
 # Create your views here.
@@ -9,35 +11,32 @@ from .forms import AdvertisementForm
 
 # представление
 def index(request):
-    advertisement = Advertisement.objects.all()
-    context = {"advertisements": advertisement}
-    return render(request, "index.html", context)
+    title = request.GET.get("query")
+    if title:
+        advertisement = Advertisement.objects.filter(title__icontains=title)  # фильтрация по заголовку
+    else:
+        advertisement = Advertisement.objects.all()  # показывает все объявления пользователю
+    context = {"advertisements": advertisement,
+               "title": title}
+    return render(request, "app_adv/index.html", context)
 
 
-def test(request):
-    return render(request, "test.html")
-
-
-def test2(request):
-    return render(request, "test2.html")
+def advertisements_detail(request, pk):
+    advertisement = Advertisement.objects.get(id=pk)
+    context = {"advertisement": advertisement}
+    return render(request, "app_adv/advertisement.html", context)
 
 
 def top_sellers(request):
-    return render(request, "top-sellers.html")
+    User = get_user_model()
+    # count считает кол-во объявлений, order_by("-adv_count") - сортирует по убыванию из-за "-"
+    users = User.objects.annotate(adv_count=Count("advertisement")).order_by("-adv_count")
+    context = {"users": users}
+    return render(request, "app_adv/top-sellers.html", context)
 
 
-def login(request):
-    return render(request, "login.html")
-
-
-def register(request):
-    return render(request, "register.html")
-
-
-def profile(request):
-    return render(request, "profile.html")
-
-
+# декоратор перенаправляет на страницу входа в случае, если пользователь не прошел аутентификацию
+@login_required(login_url=reverse_lazy("login"))
 def adv_post(request):
     if request.method == "POST":  # если пользователь отправил POST-запрос
         form = AdvertisementForm(request.POST, request.FILES)
@@ -45,9 +44,15 @@ def adv_post(request):
             advertisement = Advertisement(**form.cleaned_data)  # ** - распаковывает словарь, * - распаковывает список
             advertisement.user = request.user
             advertisement.save()
-            url = reverse("main-page")  # возвращение на главную страницу при успешном создании товара
-            return redirect(url)  # генерация url по имени
+            url = reverse("main-page")  # генерация url по имени
+            # возвращение на главную страницу при успешном создании товара
+            return redirect(url)
     else:
         form = AdvertisementForm()
     context = {"form": form}  # передача описанной формы представлению
-    return render(request, "advertisement-post.html", context)
+    return render(request, "app_adv/advertisement-post.html", context)
+# price__lt - меньше, чем(строго)
+# price__gt - больше, чем(строго)
+# price__gte - равно или больше, чем
+# price__lte - равно или меньше, чем
+# price__contains
